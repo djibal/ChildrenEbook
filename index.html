@@ -227,7 +227,7 @@
             border-radius: 2px;
         }
         
-        /* NEW: Video Preview Section */
+        /* Video Preview Section */
         .video-preview {
             background-color: white;
             position: relative;
@@ -241,12 +241,21 @@
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            position: relative;
         }
         
         .video-player {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            aspect-ratio: 16/9;
+            height: 100%;
             background-color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .video-player video {
@@ -255,6 +264,44 @@
             display: block;
         }
         
+        /* New: Video Source Tabs */
+        .video-source-tabs {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            gap: 1rem;
+        }
+        
+        .video-tab {
+            padding: 12px 24px;
+            background: rgba(73, 140, 94, 0.1);
+            color: var(--primary);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border: 2px solid transparent;
+        }
+        
+        .video-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: rgba(255,255,255,0.3);
+        }
+        
+        .video-tab:hover:not(.active) {
+            background: rgba(73, 140, 94, 0.2);
+        }
+        
+        .video-source-content {
+            display: none;
+        }
+        
+        .video-source-content.active {
+            display: block;
+        }
+        
+        /* Upload Area */
         .video-upload-area {
             background: rgba(248, 244, 233, 0.8);
             border: 3px dashed var(--secondary);
@@ -316,6 +363,33 @@
         
         .upload-btn i {
             margin-right: 8px;
+        }
+        
+        /* YouTube Form */
+        .youtube-form {
+            background: rgba(248, 244, 233, 0.8);
+            border: 3px solid var(--primary);
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin: 2rem auto;
+            max-width: 800px;
+            transition: all 0.3s ease;
+        }
+        
+        .youtube-form .upload-icon {
+            color: #ff0000;
+        }
+        
+        .youtube-input {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid var(--secondary);
+            border-radius: 50px;
+            font-size: 1rem;
+            margin: 1.5rem 0;
+            background: white;
+            max-width: 600px;
         }
         
         .video-note {
@@ -596,7 +670,7 @@
         }
         
         .testimonial-card::before {
-            content: "“"; /* Corrected: Added the opening quotation mark */
+            content: "“";
             position: absolute;
             top: -20px;
             left: 20px;
@@ -969,8 +1043,12 @@
                 display: none;
             }
             
-            .video-upload-area {
+            .video-upload-area, .youtube-form {
                 padding: 2rem 1rem;
+            }
+            
+            .video-source-tabs {
+                flex-wrap: wrap;
             }
         }
         
@@ -1022,6 +1100,12 @@
             <h1>THE SELFISH FOX <span style="color: white;">AND THE</span> SMART STORK</h1>
             <h2>A Heartwarming Tale of Kindness and Clever Friendship</h2>
             <p>Join Felix the fox and Stella the stork on a playful journey where tricks turn into lessons, and friendship wins the day. A beautifully crafted story with timeless moral lessons for children.</p>
+
+             <!-- Inside the hero-content div, after the paragraph -->
+            <p style="font-size: clamp(1rem, 2.5vw, 1.25rem); margin-top: 1rem; background: rgba(255,255,255,0.15); padding: 12px 20px; border-radius: 8px; border-left: 3px solid var(--highlight);">
+               <strong>Get it for free:</strong> Available on Gumroad and Apple Books. No payment needed - just click "Buy this", set price to £0, and download directly to your device. Click <strong>Buy Now</strong> or scroll down to reach bookstores section
+            </p>
+
             <div class="age-badge">
                 <i class="fas fa-child"></i> Recommended for ages 3-8
             </div>
@@ -1150,40 +1234,69 @@
         </div>
     </section>
 
-    <!-- Video Preview Section -->
+    <!-- Enhanced Video Preview Section -->
     <section id="video-preview" class="video-preview">
         <div class="container">
             <h2 class="section-title">Video Preview</h2>
+            
             <div class="video-container">
-                <div class="video-player">
-                    <video id="previewVideo" controls>
-                        <source src="" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
+                <div class="video-player" id="videoPlayer">
+                    <div id="videoPlaceholder" style="display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column; color: white; gap: 1rem;">
+                        <i class="fas fa-play-circle" style="font-size: 3.5rem;"></i>
+                        <h3>Select a video source to preview</h3>
+                    </div>
                 </div>
             </div>
             
-            <div class="video-upload-area" id="uploadArea">
-                <div class="upload-icon">
-                    <i class="fas fa-cloud-upload-alt"></i>
+            <!-- Video Source Tabs -->
+            <div class="video-source-tabs">
+                <div class="video-tab active" data-tab="upload">Upload Video</div>
+                <div class="video-tab" data-tab="youtube">YouTube Link</div>
+            </div>
+            
+            <!-- Upload Video Section -->
+            <div class="video-source-content active" id="uploadContent">
+                <div class="video-upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3>Upload Video Preview</h3>
+                    <p>Click here or drag & drop your video file to preview</p>
+                    <p>All major video formats supported:</p>
+                    
+                    <div class="video-formats">
+                        <span class="format-badge">MP4</span>
+                        <span class="format-badge">WebM</span>
+                        <span class="format-badge">MOV</span>
+                        <span class="format-badge">AVI</span>
+                        <span class="format-badge">WMV</span>
+                        <span class="format-badge">MKV</span>
+                    </div>
+                    
+                    <button class="upload-btn" id="uploadBtn">
+                        <i class="fas fa-upload"></i> Choose Video File
+                    </button>
+                    <input type="file" id="videoUpload" accept="video/*" style="display: none;">
                 </div>
-                <h3>Upload Video Preview</h3>
-                <p>Click here or drag & drop your video file to preview</p>
-                <p>All major video formats supported:</p>
-                
-                <div class="video-formats">
-                    <span class="format-badge">MP4</span>
-                    <span class="format-badge">WebM</span>
-                    <span class="format-badge">MOV</span>
-                    <span class="format-badge">AVI</span>
-                    <span class="format-badge">WMV</span>
-                    <span class="format-badge">MKV</span>
+            </div>
+            
+            <!-- YouTube Section -->
+            <div class="video-source-content" id="youtubeContent">
+                <div class="youtube-form">
+                    <div class="upload-icon">
+                        <i class="fab fa-youtube"></i>
+                    </div>
+                    <h3>Add YouTube Video</h3>
+                    <p>Enter YouTube video URL to preview</p>
+                    
+                    <input type="text" class="youtube-input" id="youtubeUrl" 
+                           placeholder="https://www.youtube.com/watch?v=..." 
+                           value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+                    
+                    <button class="btn" id="loadYoutubeBtn">
+                        <i class="fas fa-play"></i> Preview YouTube Video
+                    </button>
                 </div>
-                
-                <button class="upload-btn" id="uploadBtn">
-                    <i class="fas fa-upload"></i> Choose Video File
-                </button>
-                <input type="file" id="videoUpload" accept="video/*" style="display: none;">
             </div>
             
             <p class="video-note">
@@ -1454,7 +1567,27 @@
         const uploadArea = document.getElementById('uploadArea');
         const uploadBtn = document.getElementById('uploadBtn');
         const videoUpload = document.getElementById('videoUpload');
-        const previewVideo = document.getElementById('previewVideo');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const videoPlaceholder = document.getElementById('videoPlaceholder');
+        
+        // Tab functionality
+        const videoTabs = document.querySelectorAll('.video-tab');
+        const videoContents = document.querySelectorAll('.video-source-content');
+        
+        videoTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                videoTabs.forEach(t => t.classList.remove('active'));
+                videoContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding content
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}Content`).classList.add('active');
+            });
+        });
         
         uploadBtn.addEventListener('click', () => {
             videoUpload.click();
@@ -1502,31 +1635,52 @@
             // Create a URL for the video
             const videoURL = URL.createObjectURL(file);
             
-            // Set the video source
-            previewVideo.src = videoURL;
-            
-            // Update UI
-            uploadArea.innerHTML = `
-                <div class="upload-icon">
-                    <i class="fas fa-check-circle" style="color: var(--primary);"></i>
-                </div>
-                <h3>Previewing: ${file.name}</h3>
-                <p>${formatFileSize(file.size)} | ${file.type}</p>
-                <button class="upload-btn" id="changeVideoBtn" style="background: var(--accent);">
-                    <i class="fas fa-sync-alt"></i> Change Video
-                </button>
+            // Update the video player
+            videoPlayer.innerHTML = `
+                <video controls autoplay style="width:100%;height:100%;">
+                    <source src="${videoURL}" type="${file.type}">
+                    Your browser does not support the video tag.
+                </video>
             `;
             
-            // Add change video functionality
-            document.getElementById('changeVideoBtn').addEventListener('click', () => {
-                videoUpload.click();
-            });
+            // Hide the placeholder
+            videoPlaceholder.style.display = 'none';
         }
         
-        function formatFileSize(bytes) {
-            if (bytes < 1024) return bytes + ' bytes';
-            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-            else return (bytes / 1048576).toFixed(1) + ' MB';
+        // YouTube video loader
+        const youtubeUrlInput = document.getElementById('youtubeUrl');
+        const loadYoutubeBtn = document.getElementById('loadYoutubeBtn');
+        
+        loadYoutubeBtn.addEventListener('click', loadYouTubeVideo);
+        
+        function loadYouTubeVideo() {
+            const url = youtubeUrlInput.value.trim();
+            const videoId = extractYouTubeId(url);
+            
+            if (!videoId) {
+                alert('Please enter a valid YouTube URL');
+                return;
+            }
+            
+            // Update the video player
+            videoPlayer.innerHTML = `
+                <iframe width="100%" height="100%" 
+                    src="https://www.youtube.com/embed/${videoId}?autoplay=1" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            `;
+            
+            // Hide the placeholder
+            videoPlaceholder.style.display = 'none';
+        }
+        
+        function extractYouTubeId(url) {
+            // Regular expression to match YouTube URLs
+            const regExp = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^#\&\?]{11})/;
+            const match = url.match(regExp);
+            return (match && match[1]) ? match[1] : null;
         }
     </script>
 </body>
